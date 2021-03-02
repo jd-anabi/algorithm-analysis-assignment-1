@@ -3,29 +3,6 @@
 #include <inttypes.h> /* declarations of uintX_t, etc. */
 #include <limits.h>
 
-uint32_t addto32(uint32_t as[], int sz_a, uint32_t bs[], int sz_b) 
-{
-    // Asse sz_b <= sz_a
-    // Compute as += bs
-
-    int i;
-    uint32_t c = 0;
-    uint64_t s;
-    for (i = 0; i < sz_b; i++) 
-    {
-        s = (uint64_t) as[i] + (uint64_t) bs[i] + (uint64_t) c; // s is a 33 bit value
-        c = s >> 32;
-        as[i] = (uint32_t) s;
-    }
-    for ( ; i < sz_a; i++)
-    {
-        s = (uint64_t) as[i] + (uint64_t) c;
-        c = s >> 32;
-        as[i] = (uint32_t) s;
-    }
-    return c;
-}
-
 void partialprod32(uint32_t as[], int sz_a, uint32_t bs[], int sz_b, uint32_t d, int shift)
 {
     // Assume sz_b + sz_c <= sz_a => sz_b < sz_a
