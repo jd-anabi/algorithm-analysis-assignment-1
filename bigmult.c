@@ -60,7 +60,7 @@ int main(void)
 
     // let's do some test cases
     // EXAMPLE 1
-    int sz_a = 5;
+    int sz_a = 5; // sz_a = sz_b + sz_c
     int sz_b = 2;
     int sz_c = 3;
 
@@ -88,7 +88,7 @@ int main(void)
     printf("\n\nEXAMPLE 2:");
 
     // EXAMPLE 2
-    int sz_a_1 = 7; // sz_a > sz_b + sz_b (doesn't necessarily need to be >=)
+    int sz_a_1 = 7; // sz_a > sz_b + sz_b (doesn't necessarily need to be =)
     int sz_b_1 = 3;
     int sz_c_1 = 3;
 
