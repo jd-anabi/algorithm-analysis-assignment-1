@@ -10,6 +10,7 @@ void partialprod32(uint32_t as[], int sz_a, uint32_t bs[], int sz_b, uint32_t d,
     // Compute as += bs * d
 
     int i;
+    int i_shifted;
     uint32_t c1 = 0;
     uint32_t c2 = 0;
     uint64_t s;
@@ -17,16 +18,22 @@ void partialprod32(uint32_t as[], int sz_a, uint32_t bs[], int sz_b, uint32_t d,
 
     for (i = 0; i < sz_b; i++) 
     {
+        i_shifted = i+shift;
         p = (uint64_t) bs[i] * (uint64_t) d; // p is a 64 bit value
-        s = (uint64_t) as[i+shift] + (uint64_t) ((uint32_t) p) + (uint64_t) c1 + (uint64_t) c2;
+        s = (uint64_t) as[i_shifted] + (uint64_t) ((uint32_t) p) + (uint64_t) c1 + (uint64_t) c2;
         c1 = p >> 32;
         c2 = s >> 32;
-        as[i+shift] = (uint32_t) s;
+        as[i_shifted] = (uint32_t) s;
     }
 
     for ( ; i < sz_a-shift; i++)
     {
-        s = (uint64_t) as[i+shift] + (uint64_t) c1 + (uint64_t) c2;
+        if (c1 == 0 && c2 == 0)
+        {
+            break;
+        }
+        i_shifted = i+shift;
+        s = (uint64_t) as[i_shifted] + (uint64_t) c1 + (uint64_t) c2;
         c1 = 0;
         c2 = s >> 32;
         as[i+shift] = (uint32_t) s;
@@ -41,33 +48,18 @@ void bigmul64(uint64_t a[], int sz_a, uint64_t b[], int sz_b, uint64_t c[], int 
 
     int i;
 
-    for (i = 0; i < 2*sz_b; i++)
-    {
-        printf("%08x", bs[2*sz_b-1-i]);
-    }
-    printf("\n\n");
-
-    for (i = 0; i < 2*sz_c; i++)
-    {
-        printf("%08x", cs[2*sz_c-1-i]);
-    }
-    printf("\n\n");
-
     for (i = 0; i < 2*sz_c; i++)
     {
         partialprod32(as, 2*sz_a, bs, 2*sz_b, cs[i], i);
     }
-    printf("\n");
-
-    for (i = 0; i < 2*sz_a; i++)
-    {
-        printf("%08x", as[2*sz_a-1-i]);
-    }
-    printf("\n");
 }
 
 int main(void)
 {
+    int i;
+
+    // let's do some test cases
+    // EXAMPLE 1
     int sz_a = 5;
     int sz_b = 2;
     int sz_c = 3;
@@ -77,4 +69,49 @@ int main(void)
     uint64_t c[] = {0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff};
 
     bigmul64(a, sz_a, b, sz_b, c, sz_c);
+
+    printf("EXAMPLE 1:\nb = 0x");
+    for (i = 0; i < sz_b; i++)
+    {
+        printf("%016lx", b[sz_b-1-i]);
+    }
+    printf("\nc = 0x");
+    for (i = 0; i < sz_c; i++)
+    {
+        printf("%016lx", c[sz_c-1-i]);
+    }
+    printf("\na = b * c = 0x");
+    for (i = 0; i < sz_a; i++)
+    {
+        printf("%016lx", a[sz_a-1-i]);
+    }
+    printf("\n\nEXAMPLE 2:");
+
+    // EXAMPLE 2
+    int sz_a_1 = 7; // sz_a > sz_b + sz_b (doesn't necessarily need to be >=)
+    int sz_b_1 = 3;
+    int sz_c_1 = 3;
+
+    uint64_t a_1[] = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    uint64_t b_1[] = {0x1aaa, 0x00f0a2, 0x4};
+    uint64_t c_1[] = {0x1111111, 0x7a111113, 0x375};
+
+    bigmul64(a_1, sz_a_1, b_1, sz_b_1, c_1, sz_c_1);
+
+    printf("b = 0x");
+    for (i = 0; i < sz_b_1; i++)
+    {
+        printf("%016lx", b_1[sz_b_1-1-i]);
+    }
+    printf("\nc = 0x");
+    for (i = 0; i < sz_c_1; i++)
+    {
+        printf("%016lx", c_1[sz_c_1-1-i]);
+    }
+    printf("\na = b * c = 0x");
+    for (i = 0; i < sz_a_1; i++)
+    {
+        printf("%016lx", a_1[sz_a_1-1-i]);
+    }
+    printf("\n");
 }
