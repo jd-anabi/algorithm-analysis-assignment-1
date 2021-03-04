@@ -11,8 +11,8 @@ void partialprod32(uint32_t as[], int sz_a, uint32_t bs[], int sz_b, uint32_t d,
 
     int i;
     int i_shifted;
-    uint32_t c1 = 0;
-    uint32_t c2 = 0;
+    uint32_t p_split = 0;
+    uint32_t c = 0;
     uint64_t s;
     uint64_t p;
 
@@ -20,22 +20,22 @@ void partialprod32(uint32_t as[], int sz_a, uint32_t bs[], int sz_b, uint32_t d,
     {
         i_shifted = i+shift;
         p = (uint64_t) bs[i] * (uint64_t) d; // p is a 64 bit value
-        s = (uint64_t) as[i_shifted] + (uint64_t) ((uint32_t) p) + (uint64_t) c1 + (uint64_t) c2;
-        c1 = p >> 32;
-        c2 = s >> 32;
+        s = (uint64_t) as[i_shifted] + (uint64_t) ((uint32_t) p) + (uint64_t) p_split + (uint64_t) c;
+        p_split = p >> 32;
+        c = s >> 32;
         as[i_shifted] = (uint32_t) s;
     }
 
     for ( ; i < sz_a-shift; i++)
     {
-        if (c1 == 0 && c2 == 0)
+        if (p_split == 0 && c == 0)
         {
             break;
         }
         i_shifted = i+shift;
-        s = (uint64_t) as[i_shifted] + (uint64_t) c1 + (uint64_t) c2;
-        c1 = 0;
-        c2 = s >> 32;
+        s = (uint64_t) as[i_shifted] + (uint64_t) p_split + (uint64_t) c;
+        p_split = 0;
+        c = s >> 32;
         as[i+shift] = (uint32_t) s;
     }
 }
@@ -85,7 +85,7 @@ int main(void)
     {
         printf("%016lx", a[sz_a-1-i]);
     }
-    printf("\n\nEXAMPLE 2:");
+    printf("\n\n");
 
     // EXAMPLE 2
     int sz_a_1 = 7; // sz_a > sz_b + sz_b (doesn't necessarily need to be =)
@@ -98,7 +98,7 @@ int main(void)
 
     bigmul64(a_1, sz_a_1, b_1, sz_b_1, c_1, sz_c_1);
 
-    printf("b = 0x");
+    printf("EXAMPLE 2:\nb = 0x");
     for (i = 0; i < sz_b_1; i++)
     {
         printf("%016lx", b_1[sz_b_1-1-i]);
